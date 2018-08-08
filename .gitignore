@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# extra CS-related files to ignore
+*.swp
+*.pyc
+.ropeproject/
+code2html.egg-info/
+dist/
+build/
+__pycache__/
+.ok_refresh
