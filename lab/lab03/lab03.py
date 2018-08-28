@@ -14,8 +14,12 @@ def gcd(a, b):
     40
     """
 
+    # new strat: since Euclid's algorithm swaps the numbers' places for every call to gcd,
+    # eventually 'b' will have no remainder, making 'a' the final answer
+    return a if b == 0 else gcd(b, a % b)
+
     """
-    strat:
+    old strat:
         - try to get a and b to be the bigger and smaller number, respectively
         - if a == b, then a and b are divisible by themselves, which is the gcd
         - whichever is the bigger number, if the bigger number isn't cleanly divisible by the smaller one
@@ -23,12 +27,16 @@ def gcd(a, b):
           which is the remainder of the bigger divided by the smaller
         - however, if the bigger number is cleanly divisible by the smaller one, return b, which is the gcd
     """
+
+    """
+    old solution
     if a > b and a % b != 0:
         return gcd(b, a % b)
     elif b > a and b % a != 0:
         return gcd(a, b % a) # this is here to swap the bigger and smaller number role
     else:
         return b
+    """
 
 def hailstone(n):
     """Print out the hailstone sequence starting at n, and return the
