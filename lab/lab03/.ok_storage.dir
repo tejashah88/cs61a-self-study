@@ -1,8 +1,0 @@
-'gcd-correct', (0, 70)
-'hailstone-correct', (512, 70)
-'cycle-correct', (1024, 70)
-'interleaved_sum-correct', (1536, 70)
-'skip_mul-correct', (2048, 70)
-'is_prime-correct', (2560, 70)
-'is_palindrome-correct', (3072, 70)
-'ten_pairs-correct', (3584, 70)

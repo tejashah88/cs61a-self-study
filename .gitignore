@@ -112,3 +112,4 @@ dist/
 build/
 __pycache__/
 .ok_refresh
+**/.ok_*
