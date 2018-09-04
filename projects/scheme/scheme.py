@@ -32,9 +32,15 @@ def scheme_eval(expr, env, _=None): # Optional third argument is ignored
     else:
         # BEGIN PROBLEM 5
         procedure = scheme_eval(first, env)
-        check_procedure(procedure) # seems to be unnecessary for passing doctests, but better safe than sorry
-        args = rest.map(lambda element: scheme_eval(element, env))
-        return scheme_apply(procedure, args, env)
+        check_procedure(procedure)
+        if isinstance(procedure, MacroProcedure):
+            # apply the operands to the macro and THEN evaluate any defined variable to values
+            result = procedure.apply_macro(rest, env)
+            return scheme_eval(result, env)
+        else:
+            # evaluate each argument to it's corresponding value and apply it to the entire procedure
+            args = rest.map(lambda element: scheme_eval(element, env))
+            return scheme_apply(procedure, args, env)
         # END PROBLEM 5
 
 def self_evaluating(expr):
@@ -123,7 +129,7 @@ class Frame:
         child = Frame(self) # Create a new child with self as the parent
         # BEGIN PROBLEM 11
         if (len(formals) != len(vals)):
-            raise SchemeError
+            raise SchemeError('Length of formals ({0}) does not match length of values ({1})'.format(len(formals), len(vals)))
         while len(formals) and len(vals):
             child.define(formals.first, vals.first)
             formals, vals = formals.second, vals.second
@@ -173,7 +179,7 @@ class PrimitiveProcedure(Procedure):
         try:
             return self.fn(*python_args)
         except TypeError:
-            raise SchemeError
+            raise SchemeError('Incorrect number of arguments passed into function!')
         # END PROBLEM 4
 
 class LambdaProcedure(Procedure):
@@ -245,11 +251,10 @@ def do_define_form(expressions, env):
         # - since target is a list, the first arg is the symbol and the rest is
         #   the 'formals' or paramters the lambda can accept
         # - the body is the rest of the expressions
-        formals = target.second
-        body = expressions.second
-        value = LambdaProcedure(formals, expressions.second, env)
-        env.define(target.first, value)
-        return target.first
+        name, formals, body = target.first, target.second, expressions.second
+        value = LambdaProcedure(formals, body, env)
+        env.define(name, value)
+        return name
         # END PROBLEM 10
     else:
         bad_target = target.first if isinstance(target, Pair) else target
@@ -283,7 +288,6 @@ def do_if_form(expressions, env):
         return scheme_eval(expressions.second.first, env)
     elif len(expressions) == 3:
         # we apply tail call optimization in case the third expression implies a tail-recursive form
-        print(expressions)
         return scheme_eval(expressions.second.second.first, env, True)
 
 def do_and_form(expressions, env):
@@ -346,9 +350,10 @@ def do_cond_form(expressions, env):
             test = scheme_eval(clause.first, env)
         if scheme_truep(test):
             # BEGIN PROBLEM 14
-            if clause.second is nil: # return the predicate value if there are no sub-expressions in the clause
-                return test
-            return eval_all(clause.second, env) # evaluate all the sub-expressions and return the result of the last one
+            # return the predicate value if there are no sub-expressions in the clause
+            # otherwise, evaluate all the sub-expressions and return the result of the last one
+
+            return test if clause.second is nil else eval_all(clause.second, env)
             # END PROBLEM 14
         expressions = expressions.second
 
@@ -382,7 +387,18 @@ def make_let_frame(bindings, env):
 def do_define_macro(expressions, env):
     """Evaluate a define-macro form."""
     # BEGIN Problem 21
-    "*** YOUR CODE HERE ***"
+    check_form(expressions, 2)
+    target = expressions.first
+    # make sure that we have a pair expression here, or else we'll hit an error when accessing the macro
+    if isinstance(target, Pair):
+        name, formals, body = target.first, target.second, expressions.second
+        # make sure that the name is actually a name and not a value
+        if scheme_symbolp(name):
+            check_formals(formals)
+            macro = MacroProcedure(formals, body, env)
+            env.define(name, macro)
+            return name
+    raise SchemeError("Invalid macro definition")
     # END Problem 21
 
 
