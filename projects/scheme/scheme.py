@@ -55,12 +55,23 @@ def eval_all(expressions, env):
     """Evaluate each expression im the Scheme list EXPRESSIONS in
     environment ENV and return the value of the last."""
     # BEGIN PROBLEM 8
+    # without tail call optimization
+    # if expressions is nil:
+    #     return None
+    # result = scheme_eval(expressions.first, env)
+    # # return 'result' if there are no further expressions to evaluate (i.e. it's the last expression)
+    # # else, dive deeper into the expressions list
+    # return result if expressions.second is nil else eval_all(expressions.second, env)
+
+    # with tail call optimization
     if expressions is nil:
         return None
-    result = scheme_eval(expressions.first, env)
-    # return 'result' if there are no further expressions to evaluate (i.e. it's the last expression)
-    # else, dive deeper into the expressions list
-    return result if expressions.second is nil else eval_all(expressions.second, env)
+    if expressions.second is nil:
+        # nothing else to evaluate recursively, we can apply tail call optimization while evaluating the first part
+        return scheme_eval(expressions.first, env, True)
+    # otherwise, evaluate the first part and then dive deeper into the expressions list
+    scheme_eval(expressions.first, env)
+    return eval_all(expressions.second, env)
     # END PROBLEM 8
 
 ################
@@ -271,36 +282,55 @@ def do_if_form(expressions, env):
     if scheme_truep(scheme_eval(expressions.first, env)):
         return scheme_eval(expressions.second.first, env)
     elif len(expressions) == 3:
-        return scheme_eval(expressions.second.second.first, env)
+        # we apply tail call optimization in case the third expression implies a tail-recursive form
+        print(expressions)
+        return scheme_eval(expressions.second.second.first, env, True)
 
 def do_and_form(expressions, env):
     """Evaluate a (short-circuited) and form."""
     # BEGIN PROBLEM 13
+    # with tail call optimization
     if expressions is nil: # for handing "(and)"
         return True
-    computed = scheme_eval(expressions.first, env)
-    if scheme_truep(computed):
-        # if we reach the end of the expressions list, return the computed value
-        # else, keep processing the list
-        return computed if expressions.second is nil else do_and_form(expressions.second, env)
-    else:
-        # short circuit to false
-        return False
+    # only if there are no other expressions to evaluate, should we apply tail call optimization in case of a tail-recursive form
+    computed = scheme_eval(expressions.first, env, expressions.second is nil)
+    # 'should_break' is true only if either the computed value is falsey or we have no other expressions to evaluate
+    should_break = expressions.second is nil or scheme_falsep(computed)
+    return computed if should_break else do_and_form(expressions.second, env)
+
+    # without tail call optimization
+    # if expressions is nil: # for handing "(and)"
+    #     return True
+    # computed = scheme_eval(expressions.first, env)
+    # if scheme_truep(computed):
+    #     # if we reach the end of the expressions list, return the computed value
+    #     # else, keep processing the list
+    #     return computed if expressions.second is nil else do_and_form(expressions.second, env)
+    # # short circuit to false
+    # return False
     # END PROBLEM 13
 
 def do_or_form(expressions, env):
     """Evaluate a (short-circuited) or form."""
     # BEGIN PROBLEM 13
+    # with tail call optimization
     if expressions is nil: # for handing "(or)"
         return False
-    computed = scheme_eval(expressions.first, env)
-    if scheme_truep(computed):
-        # short circuit to the computed value
-        return computed
-    else:
-        # if we reach the end of the expressions list, return false
-        # else, keep processing the list
-        return False if expressions.second is nil else do_or_form(expressions.second, env)
+    # only if there are no other expressions to evaluate, should we apply tail call optimization in case of a tail-recursive form
+    computed = scheme_eval(expressions.first, env, expressions.second is nil)
+    # return the computed value if the computed value is truthy, otherwise check the other expressions
+    return computed if scheme_truep(computed) else do_or_form(expressions.second, env)
+
+    # without tail call optimization
+    # if expressions is nil: # for handing "(or)"
+    #     return False
+    # computed = scheme_eval(expressions.first, env)
+    # if scheme_truep(computed):
+    #     # short circuit to the computed value
+    #     return computed
+    # # if we reach the end of the expressions list, return false
+    # # else, keep processing the list
+    # return False if expressions.second is nil else do_or_form(expressions.second, env)
     # END PROBLEM 13
 
 def do_cond_form(expressions, env):
@@ -520,15 +550,19 @@ def optimize_tail_calls(original_scheme_eval):
             return Thunk(expr, env)
         else:
             result = Thunk(expr, env)
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+        # BEGIN QUESTION 20
+        # evaluate expression in environment until we don't have a thunk, then return it
+        while isinstance(result, Thunk):
+            result = original_scheme_eval(result.expr, result.env)
+        return result
+        # END QUESTION 20
     return optimized_eval
 
 ################################################################
 # Uncomment the following line to apply tail call optimization #
 ################################################################
-# scheme_eval = optimize_tail_calls(scheme_eval)
+# functions to check for changing: eval_all, do_if_form, do_and_form, do_or_form
+scheme_eval = optimize_tail_calls(scheme_eval)
 
 
 ####################
