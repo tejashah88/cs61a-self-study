@@ -1,5 +1,5 @@
 def multiply(m, n):
-    """
+    """Recursively multiply the number 'm' by 'n' times
     >>> multiply(5, 3)
     15
     """
@@ -8,7 +8,7 @@ def multiply(m, n):
     """END PROBLEM 2.1"""
 
 def countdown(n):
-    """
+    """Recursively print a countdown from n to 1
     >>> countdown(3)
     3
     2
@@ -21,7 +21,7 @@ def countdown(n):
     """END PROBLEM 2.2"""
 
 def countup(n):
-    """
+    """Recursively print a countup (or reverse countdown) from 1 to n
     >>> countup(3)
     1
     2
@@ -34,7 +34,7 @@ def countup(n):
     """END PROBLEM 2.3"""
 
 def sum_digits(n):
-    """
+    """Recursively calculate the sum of the digits of 'n'
     >>> sum_digits(7)
     7
     >>> sum_digits(30)
@@ -47,7 +47,7 @@ def sum_digits(n):
     """END PROBLEM 2.4"""
 
 def count_stair_ways(n):
-    """
+    """Count the numbers of ways to walk up a flight of stairs with 'n' steps while taking a maximum of 2 steps at a time
     >>> count_stair_ways(2)
     2
     >>> count_stair_ways(3)
@@ -71,7 +71,7 @@ def count_stair_ways(n):
     """END PROBLEM 3.1"""
 
 def count_k(n, k):
-    """
+    """Generalized version of count_stair_ways, except that the max number of step to take is defined by 'k'
     >>> count_k(3, 3) # 3, 2 + 1, 1 + 2, 1 + 1 + 1
     4
     >>> count_k(4, 4)
@@ -87,7 +87,6 @@ def count_k(n, k):
         return 1
     else:
         return sum([count_k(n - i, k) for i in range(1, k + 1)])
-
 
 if __name__ == "__main__":
     import doctest

@@ -1,5 +1,5 @@
 def wears_jacket(temp, raining):
-    """
+    """Returns true if the temperature is less than 60 degrees OR it is raining
     >>> wears_jacket(90, False)
     False
     >>> wears_jacket(40, False)
@@ -12,7 +12,7 @@ def wears_jacket(temp, raining):
     """END PROBLEM 1.1"""
 
 def handle_overflow(s1, s2):
-    """
+    """Prints the instructions for handling potential overflows between 2 classes
     >>> handle_overflow(27, 15)
     No overflow
     >>> handle_overflow(35, 29)
@@ -34,7 +34,7 @@ def handle_overflow(s1, s2):
     """END PROBLEM 1.2"""
 
 def is_prime(n):
-    """
+    """Returns if the given number is a prime number or not
     >>> is_prime(10)
     False
     >>> is_prime(7)
@@ -44,9 +44,9 @@ def is_prime(n):
     if n in [2, 3]: # shortcut for if n equals 2 or 3
         return True
 
-    if n % 2 == 0 or n < 2: # skip even numbers
+    if n % 2 == 0 or n < 2: # skip even numbers, since they are not prime anyways
         return False
-    # only iterate the odd numbers from 3 to the nearest whole number of sqrt(n)
+    # only iterate the odd numbers from 3 to the nearest whole number of sqrt(n), skipping even numbers
     for i in range(3, round(n ** 0.5), 2):
         if n % i == 0: # if this conditional is true, n isn't prime
             return False
@@ -78,11 +78,11 @@ def keep_ints_compose(n):
     """
     """BEGIN PROBLEM 2.3"""
     lst = [i for i in range(1, n + 1)]
+    # I could have used a lambda expression, but since it returns anything it evaluates, it would fail the test cases
     def process(cond):
         [print(i) for i in lst if cond(i)]
     return process
     """END PROBLEM 2.3"""
-
 
 if __name__ == "__main__":
     import doctest

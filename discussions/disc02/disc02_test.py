@@ -79,7 +79,5 @@ class ProblemTester(test_utils.EnhancedTestCase):
         self.assertEqual(count_k(10, 3), 274)
         self.assertEqual(count_k(300, 1), 1)
 
-
-
 if __name__ == "__main__":
     unittest.main()
